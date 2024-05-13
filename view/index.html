@@ -1,29 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xat M5</title>
+    <link rel="stylesheet" href="index.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 </head>
+
 <body>
     <div class="container">
         <br>
         <div class="jumbotron">
-        <h1 class="display-4">Enviar missatge</h1>
-        <br>
-        <input id="name" class="form-control" placeholder="Nom">
-        <br>
-        <textarea id="message" class="form-control" placeholder="Escriu el teu missatge...">
-       </textarea>
-        <br>
-        <button id="send" class="btn btn-success">Enviar</button>
+            <h1 class="display-4">Enviar missatge</h1>
+            <br>
+            <input id="name" class="form-control" placeholder="Nom">
+            <br>
+            <textarea id="message" class="form-control" placeholder="Escriu el teu missatge..."></textarea>
+            <br>
+            <button id="send" class="btn btn-success">Enviar</button>
         </div>
         <div id="messages">
-        
-       </div>
-       </div>
-       <script>
 
-       </script>
+        </div>
+    </div>
+    <script>
+        const ws = new WebSocket('ws://localhost:3000');
+
+        ws.onopen = () => {
+            console.log('Conexión establecida');
+        };
+
+        ws.onmessage = (event) => {
+            event.data.text().then(function (message) {
+                console.log('Mensaje recibido del servidor:', message);
+
+                const messagesDiv = document.getElementById('messages');
+                const messageP = document.createElement('p');
+                messageP.textContent = message;
+                messagesDiv.appendChild(messageP);
+
+            }).catch(function (error) {
+                console.error('Error al leer el mensaje:', error);
+            });
+        };
+
+        ws.onerror = (error) => {
+            console.error('Error de WebSocket:', error);
+            reject(error); // Rechaza la promesa si ocurre un error
+        };
+
+        document.getElementById('send').addEventListener('click', function () {
+            const nameInput = document.getElementById('name');
+            const messageInput = document.getElementById('message');
+            const message = nameInput.value + ': ' + messageInput.value;
+            ws.send(message);
+            messageInput.value = '';
+        });
+    </script>
 </body>
+
 </html>
